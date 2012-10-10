@@ -15,6 +15,8 @@ class Level:
         self.load(ID)
         self.l = []
         def print_l (*args):
+            if not self.l:
+                return
             x = min(x[0] for x in self.l)
             y = min(x[1] for x in self.l)
             w = max(x[0] for x in self.l) - x
