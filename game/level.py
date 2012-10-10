@@ -3,16 +3,15 @@ from math import log
 import pygame as pg
 from .ext import evthandler as eh
 
-import conf
+from conf import conf
+from util import ir
 
-ir = lambda x: int(round(x))
+
 err = 10 ** -5
 
 class Level:
-    def __init__ (self, game, event_handler, ID):
+    def __init__ (self, game, event_handler, ID = 0):
         self.game = game
-        self.event_handler = event_handler
-        self.frame = conf.FRAME
         self.load(ID)
         self.l = []
         def print_l (*args):
