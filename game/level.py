@@ -52,7 +52,9 @@ class Level:
         self.rect = pg.Rect(self.pos, (ir(w), ir(h)))
         # get other stuff
         self.rects = list(data['rects'])
-        self.objs = [o + conf.OBJ_SIZE for o in data['objs']]
+        self.objs = [('grow', o + conf.OBJ_SIZE) for o in data.get('gobjs', [])]
+        self.objs += [('shrink', o + conf.OBJ_SIZE)
+                      for o in data.get('sobjs', [])]
         self.player = list(data['player']) + list(conf.PLAYER_SIZE)
         # init player
         self.v = [0, 0]
@@ -88,7 +90,7 @@ class Level:
             self.v[1] -= conf.JUMP_CONTINUE * self.speed
 
     def collect (self, p, s):
-        for i, o in enumerate(self.objs):
+        for i, (t, o) in enumerate(self.objs):
             if p[0] < o[0] + o[2] and p[0] + s[0] > o[0] and \
                p[1] < o[1] + o[3] and p[1] + s[1] > o[1] :
                 return i
@@ -96,7 +98,7 @@ class Level:
     def collision (self, p, s):
         for r in self.rects:
             if p[0] + err < r[0] + r[2] and p[0] + s[0] > r[0] + err and \
-               p[1] + err < r[1] + r[3] and p[1] + s[1] > r[1] + err:
+            p[1] + err < r[1] + r[3] and p[1] + s[1] > r[1] + err:
                 return True
         return p[0] + err < 0 or p[0] + s[0] > self.size[0] + err or \
                p[1] + err < 0 or p[1] + s[1] > self.size[1] + err
@@ -127,8 +129,11 @@ class Level:
         # collect
         obj = self.collect(p, s)
         if obj is not None:
+            factor = conf.GROWTH
+            if self.objs[obj][0] == 'shrink':
+                factor = 1. / factor
             self.objs.pop(obj)
-            self.player_size *= conf.GROWTH
+            self.player_size *= factor
             self.speed = conf.SPEED_GROWTH ** (log(self.player_size) / log(2))
             # grow player around centre
             for i in (0, 1):
@@ -169,7 +174,8 @@ class Level:
         screen.fill((255, 255, 255), self.rect)
         for r in self.rects:
             screen.fill((0, 0, 0), self.to_screen(r))
-        for o in self.objs:
-            screen.fill((0, 255, 0), self.to_screen(o))
+        for t, o in self.objs:
+            screen.fill((0, 255, 0) if t == 'grow' else (0, 0, 255),
+                        self.to_screen(o))
         screen.fill((255, 0, 0), self.to_screen(self.player))
         return True
