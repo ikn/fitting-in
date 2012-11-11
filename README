@@ -1,0 +1,27 @@
+Fitting In, a platformer with size-changing collectibles.
+
+    DEPENDENCIES
+
+Python (2.6 or later 2.x)
+Pygame (1.8 or later, probably; tested with 1.9.1)
+
+    RUNNING
+
+This should work wherever Pygame does.  On systems with a sh-compatible shell,
+do
+
+    ./run
+
+On other systems (Windows, for example), run game.py with your Python 2
+executable.
+
+    CONTROLS
+
+arrow keys, WASD, space: move and jump
+R: reset current level
+
+WASD works in Dvorak, AZERTY and Colemak too.
+
+    LICENSING
+
+Source code is available under the GPL version 3 (included).

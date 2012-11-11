@@ -22,7 +22,8 @@ class Conf (object):
     if system() == 'Windows':
         try:
             import ctypes
-            n = ctypes.windll.kernel32.GetEnvironmentVariableW(u'APPDATA', None, 0)
+            n = ctypes.windll.kernel32.GetEnvironmentVariableW(u'APPDATA',
+                                                               None, 0)
             if n == 0:
                 raise ValueError()
         except Exception:
@@ -60,6 +61,10 @@ class Conf (object):
     # timing
     FPS = dd(60) # per-backend
 
+    # debug
+    PROFILE_STATS_FILE = '.profile_stats'
+    DEFAULT_PROFILE_TIME = 5
+
     # input
     KEYS_NEXT = (pg.K_RETURN, pg.K_SPACE, pg.K_KP_ENTER)
     KEYS_BACK = (pg.K_ESCAPE, pg.K_BACKSPACE)
@@ -67,15 +72,13 @@ class Conf (object):
     KEYS_FULLSCREEN = (pg.K_F11, (pg.K_RETURN, pg.KMOD_ALT, True),
                     (pg.K_KP_ENTER, pg.KMOD_ALT, True))
     KEYS_LEFT = (pg.K_LEFT, pg.K_a, pg.K_q)
-    KEYS_RIGHT = (pg.K_RIGHT, pg.K_d, pg.K_e)
+    KEYS_RIGHT = (pg.K_RIGHT, pg.K_d, pg.K_e, pg.K_s)
     KEYS_UP = (pg.K_UP, pg.K_w, pg.K_z, pg.K_COMMA)
-    KEYS_DOWN = (pg.K_DOWN, pg.K_s, pg.K_o)
-    KEYS_DIRN = (KEYS_LEFT, KEYS_UP, KEYS_RIGHT, KEYS_DOWN)
-    KEYS_MOVE = KEYS_DIRN
-    KEYS_JUMP = (pg.K_SPACE, pg.K_UP)
+    KEYS_JUMP = KEYS_UP + (pg.K_SPACE,)
     KEYS_RESET = (pg.K_r,)
 
     # audio
+    MUSIC_AUTOPLAY = False # just pauses music
     MUSIC_VOLUME = dd(.5) # per-backend
     SOUND_VOLUME = .5
     EVENT_ENDMUSIC = pg.USEREVENT

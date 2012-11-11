@@ -6,8 +6,8 @@ from .ext import evthandler as eh
 from conf import conf
 from util import ir
 
-
 err = 10 ** -5
+
 
 class Level:
     def __init__ (self, game, event_handler, ID = 0):
@@ -119,7 +119,7 @@ class Level:
             d = acc * (1 if v[i] > 0 else -1)
             p[i] += v[i]
             while v[i] != 0 and self.collision(p, s):
-                if i and d > 0:
+                if i == 1 and d > 0:
                     grounded = True
                 diff = v[i]
                 if abs(diff) <= abs(d):
