@@ -1,4 +1,4 @@
-Fitting In (release 1-next): a platformer with size-changing collectibles.
+Fitting In (release 2): a platformer with size-changing collectibles.
 
     DEPENDENCIES
 
@@ -23,8 +23,12 @@ To finish each level, collect each of the...floating squares.
 
 arrow keys, WASD, space: move and jump
 R: reset current level
+escape, backspace: quit
+F11, alt + enter: toggle fullscreen
+F10: minimise
 
-WASD works in Dvorak, AZERTY and Colemak too.
+WASD and R are in the same place in Dvorak, AZERTY and Colemak keyboard layouts
+too.
 
     LICENSING
 

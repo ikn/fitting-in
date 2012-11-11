@@ -738,9 +738,10 @@ if __name__ == '__main__':
     else:
         # run normally
         restarting = True
+        conf.DEBUG = len(argv) >= 2 and argv[1] == 'dbg'
+        level = int(argv[-1]) if len(argv) >= 2 and argv[-1].isdigit() else 0
         while restarting:
             restarting = False
-            level = int(argv[1]) if len(argv) >= 2 else 0
             Game(Level, level).run()
 
 pg.quit()

@@ -13,19 +13,6 @@ class Level:
     def __init__ (self, game, event_handler, ID = 0):
         self.game = game
         self.load(ID)
-        self.l = []
-        def print_l (*args):
-            if not self.l:
-                return
-            x = min(x[0] for x in self.l)
-            y = min(x[1] for x in self.l)
-            w = max(x[0] for x in self.l) - x
-            h = max(x[1] for x in self.l) - y
-            x = ir(float(x - self.pos[0]) / self.scale)
-            y = ir(float(y - self.pos[1]) / self.scale)
-            w = ir(float(w) / self.scale)
-            h = ir(float(h) / self.scale)
-            print (x, y, w, h)
         # controls
         event_handler.add_key_handlers([
             (conf.KEYS_LEFT, ((self.move, (-1,)),), eh.MODE_HELD),
@@ -33,10 +20,33 @@ class Level:
             (conf.KEYS_JUMP, self.jump_start, eh.MODE_ONDOWN),
             (conf.KEYS_JUMP, self.jump_continue, eh.MODE_HELD),
             (conf.KEYS_RESET, self.reset, eh.MODE_ONDOWN),
-            ((pg.K_s,), lambda *args: setattr(self, 'l', []), eh.MODE_ONDOWN),
-            ((pg.K_p,), print_l, eh.MODE_ONDOWN)
+            (conf.KEYS_BACK, lambda *args: game.quit_backend(), eh.MODE_ONDOWN)
         ])
-        event_handler.add_event_handlers({pg.MOUSEBUTTONDOWN: lambda e: self.l.append(e.pos)})
+
+        if conf.DEBUG:
+
+            def print_l (*args):
+                if not self.l:
+                    return
+                x = min(x[0] for x in self.l)
+                y = min(x[1] for x in self.l)
+                w = max(x[0] for x in self.l) - x
+                h = max(x[1] for x in self.l) - y
+                x = ir(float(x - self.pos[0]) / self.scale)
+                y = ir(float(y - self.pos[1]) / self.scale)
+                w = ir(float(w) / self.scale)
+                h = ir(float(h) / self.scale)
+                print (x, y, w, h)
+
+            self.l = []
+            event_handler.add_key_handlers([
+                ((pg.K_s,), lambda *args: setattr(self, 'l', []),
+                 eh.MODE_ONDOWN),
+                ((pg.K_p,), print_l, eh.MODE_ONDOWN)
+            ])
+            event_handler.add_event_handlers({
+                pg.MOUSEBUTTONDOWN: lambda e: self.l.append(e.pos)
+            })
 
     def load (self, ID):
         self.ID = ID
@@ -65,9 +75,10 @@ class Level:
         # init player
         self.v = [0, 0]
         self.jumping = 0
-        self.jumps_left = conf.NUM_ALLOWED_JUMPS
+        self.jumped = False
         self.player_size = 1
         self.speed = 1
+        self.jump_speed = 1
 
     def to_screen (self, r):
         l, t = self.pos
@@ -83,17 +94,15 @@ class Level:
         v = conf.SPEED_GROUND if self.grounded else conf.SPEED_AIR
         self.v[0] += d * self.speed * v
 
-    def jump_start (self, k, t, m):
-        if self.grounded or self.jumps_left:
-            if self.grounded:
-                self.jumps_left = conf.NUM_ALLOWED_JUMPS
-            self.v[1] -= conf.JUMP_START * self.speed
+    def jump_start (self, *args):
+        if self.grounded:
             self.jumping = conf.JUMP_TIME
-            self.jumps_left -= 1
+            self.jump_continue()
 
-    def jump_continue (self, k, t, m):
+    def jump_continue (self, *args):
         if self.jumping:
-            self.v[1] -= conf.JUMP_CONTINUE * self.speed
+            self.v[1] -= conf.JUMP(conf.JUMP_TIME - self.jumping) * self.jump_speed
+            self.jumped = True
 
     def collect (self, p, s):
         for i, (t, o) in enumerate(self.objs):
@@ -111,8 +120,6 @@ class Level:
 
     def update (self):
         if self.jumping:
-            if self.jumping > conf.JUMP_TIME - conf.AUTO_JUMP:
-                self.v[1] -= conf.JUMP_START * self.speed
             self.jumping -= 1
         p = self.player[:2]
         s = self.player[2:]
@@ -136,11 +143,10 @@ class Level:
         obj = self.collect(p, s)
         if obj is not None:
             factor = conf.GROWTH
-            if self.objs[obj][0] == 'shrink':
-                factor = 1. / factor
+            self.player_size *= 1. / factor if self.objs[obj][0] == 'shrink' else factor
             self.objs.pop(obj)
-            self.player_size *= factor
-            self.speed = conf.SPEED_GROWTH ** (log(self.player_size) / log(2))
+            self.speed = conf.SPEED_GROWTH ** (log(self.player_size) / log(factor))
+            self.jump_speed = conf.JUMP_GROWTH ** (log(self.player_size) / log(factor))
             # grow player around centre
             for i in (0, 1):
                 c = p[i] + float(s[i]) / 2
@@ -172,18 +178,18 @@ class Level:
                 p = list(q)
         self.grounded = grounded
         self.player = p + s
-        self.v = [v[0] * (conf.DAMP_GROUND if grounded else conf.DAMP_AIR),
-                  v[1] * conf.DAMP_AIR + conf.GRAVITY]
+        self.v = [v[0] * (conf.DAMP_GROUND if grounded else conf.DAMP_AIR[0]),
+                  v[1] * conf.DAMP_AIR[1] + conf.GRAVITY]
 
     def draw (self, screen):
         if self.dirty:
             self.update_scale()
-        screen.fill((0, 0, 0))
-        screen.fill((255, 255, 255), self.rect)
+        screen.fill((20, 20, 20))
+        screen.fill((255, 255, 200), self.rect)
         for r in self.rects:
-            screen.fill((0, 0, 0), self.to_screen(r))
+            screen.fill((20, 20, 20), self.to_screen(r))
         for t, o in self.objs:
-            screen.fill((0, 255, 0) if t == 'grow' else (0, 0, 255),
+            screen.fill((70, 130, 70) if t == 'grow' else (70, 70, 130),
                         self.to_screen(o))
-        screen.fill((255, 0, 0), self.to_screen(self.player))
+        screen.fill((200, 0, 0), self.to_screen(self.player))
         return True
