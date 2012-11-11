@@ -1,4 +1,4 @@
-Fitting In, a platformer with size-changing collectibles.
+Fitting In (release 1): a platformer with size-changing collectibles.
 
     DEPENDENCIES
 
@@ -14,6 +14,10 @@ do
 
 On other systems (Windows, for example), run game.py with your Python 2
 executable.
+
+    PLAYING
+
+To finish each level, collect each of the...floating squares.
 
     CONTROLS
 
