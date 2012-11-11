@@ -42,16 +42,20 @@ class Level:
         self.ID = ID
         self.reset()
 
-    def reset (self, *args):
-        data = conf.LEVELS[self.ID]
-        w, h = self.size = data['size']
+    def update_scale (self):
         # determine display pos
+        w, h = self.size
         sw, sh = conf.RES
         self.scale = s = min(sw / float(w), sh / float(h))
         w *= s
         h *= s
         self.pos = (ir((sw - w) / 2), ir((sh - h) / 2))
         self.rect = pg.Rect(self.pos, (ir(w), ir(h)))
+
+    def reset (self, *args):
+        data = conf.LEVELS[self.ID]
+        self.size = data['size']
+        self.update_scale()
         # get other stuff
         self.rects = list(data['rects'])
         self.objs = [('grow', o + conf.OBJ_SIZE) for o in data.get('gobjs', [])]
@@ -172,6 +176,8 @@ class Level:
                   v[1] * conf.DAMP_AIR + conf.GRAVITY]
 
     def draw (self, screen):
+        if self.dirty:
+            self.update_scale()
         screen.fill((0, 0, 0))
         screen.fill((255, 255, 255), self.rect)
         for r in self.rects:
